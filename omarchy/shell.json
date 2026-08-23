@@ -1,0 +1,87 @@
+{
+  "bar": {
+    "centerAnchor": "omarchy.clock",
+    "layout": {
+      "center": [
+        {
+          "id": "omarchy.indicators"
+        },
+        {
+          "format": "dddd h:mm AP",
+          "formatAlt": "d MMMM 'W'ww yyyy",
+          "id": "omarchy.clock",
+          "verticalFormat": "HH\n—\nmm"
+        },
+        {
+          "id": "omarchy.keyboard-layout"
+        },
+        {
+          "id": "omarchy.weather"
+        },
+        {
+          "id": "omarchy.system-update"
+        }
+      ],
+      "left": [
+        {
+          "id": "omarchy.menu"
+        },
+        {
+          "id": "omarchy.workspaces"
+        }
+      ],
+      "right": [
+        {
+          "id": "omarchy.agents"
+        },
+        {
+          "hidden": [],
+          "id": "omarchy.tray",
+          "pinned": [
+            "obs",
+            "easyeffects",
+            "discord_status_icon_1"
+          ]
+        },
+        {
+          "id": "omarchy.bluetooth"
+        },
+        {
+          "id": "omarchy.network"
+        },
+        {
+          "id": "omarchy.audio"
+        },
+        {
+          "id": "omarchy.monitor"
+        },
+        {
+          "id": "omarchy.power"
+        }
+      ]
+    },
+    "position": "top",
+    "transparent": false
+  },
+  "cloneSourceRestores": [
+    "soban.emojis",
+    "soban.clipboard"
+  ],
+  "disabledPlugins": [
+    "omarchy.emojis",
+    "omarchy.clipboard"
+  ],
+  "idle": {
+    "lock": 242,
+    "screensaver": 240
+  },
+  "plugins": [
+    {
+      "id": "soban.emojis"
+    },
+    {
+      "id": "soban.clipboard"
+    }
+  ],
+  "version": 1
+}

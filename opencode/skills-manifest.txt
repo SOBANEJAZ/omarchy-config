@@ -1,0 +1,27 @@
+algorithmic-art
+brainstorming
+docx
+eledralabs-ai-stack
+eraser-diagrams
+frontend-design
+git-commit
+grilling
+grill-me
+omarchy
+pdf
+pptx
+remotion-best-practices
+seo-audit
+skill-creator
+supabase-postgres-best-practices
+ui-ux-pro-max
+vercel-composition-patterns
+vercel-react-best-practices
+vercel-react-native-skills
+writing
+xlsx
+
+Notes:
+- omarchy, grill-me, grilling, brainstorming: custom/authored skills from opencode sessions (May-Aug 2026).
+- Remaining skills: third-party or project-authored; reinstall from their sources.
+- Mirror shared skills into ~/.claude/skills/ to keep both agents in sync (session 2026-05-18).

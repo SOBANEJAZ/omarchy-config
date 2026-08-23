@@ -1,0 +1,20 @@
+{
+  "herdr": {
+    "PreInvocation": [
+      {
+        "command": "bash '/home/soban/.gemini/config/hooks/herdr-agent-state.sh' session",
+        "timeout": 10,
+        "type": "command"
+      }
+    ]
+  },
+  "herdr-session-title": {
+    "PreInvocation": [
+      {
+        "command": "bash '/home/soban/.gemini/config/hooks/herdr-agent-session-title.sh'",
+        "timeout": 10,
+        "type": "command"
+      }
+    ]
+  }
+}

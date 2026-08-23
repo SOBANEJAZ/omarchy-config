@@ -1,0 +1,11 @@
+#!/bin/bash
+if omarchy-cmd-present voxtype; then
+  voxtype status --extended --format json | jq -c '{
+    icon: .class,
+    class: .class,
+    tooltip: .tooltip,
+    alt: .alt
+  }'
+else
+  echo '{"icon": "", "tooltip": ""}'
+fi
