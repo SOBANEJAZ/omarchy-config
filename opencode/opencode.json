@@ -35,6 +35,10 @@
   "permission": {
     "external_directory": {
       "/tmp/**": "allow"
+    },
+    "read": {
+      "*": "allow",
+      "*.env": "allow"
     }
   },
   "plugin": ["@mohak34/opencode-notifier@latest"]
