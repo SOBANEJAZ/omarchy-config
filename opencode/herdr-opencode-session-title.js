@@ -1,17 +1,11 @@
 import net from "node:net";
 
 const SOURCE = "user:opencode-session-title";
-const AGENT = "opencode";
+const FALLBACK_TITLE = "OpenCode";
 const ROUTE_POLL_INTERVAL_MS = 100;
 const PLACEHOLDER_TITLES = new Set(["new session", "untitled", "untitled session"]);
 
-let reportSeq = Date.now() * 1_000;
 let requestChain = Promise.resolve();
-
-function nextReportSeq() {
-  reportSeq += 1;
-  return reportSeq;
-}
 
 function displayTitle(title) {
   if (typeof title !== "string") {
@@ -23,9 +17,9 @@ function displayTitle(title) {
 }
 
 function requestOnce(title) {
-  const paneId = process.env.HERDR_PANE_ID;
+  const tabId = process.env.HERDR_TAB_ID;
   const socketPath = process.env.HERDR_SOCKET_PATH;
-  if (!paneId || !socketPath) {
+  if (!tabId || !socketPath) {
     return Promise.resolve(false);
   }
 
@@ -35,15 +29,10 @@ function requestOnce(title) {
     id: `${SOURCE}:${Date.now()}:${Math.floor(Math.random() * 1_000_000)
       .toString()
       .padStart(6, "0")}`,
-    method: "pane.report_metadata",
+    method: "tab.rename",
     params: {
-      pane_id: paneId,
-      source: SOURCE,
-      agent: AGENT,
-      seq: nextReportSeq(),
-      ...(title
-        ? { display_agent: title }
-        : { clear_display_agent: true }),
+      tab_id: tabId,
+      label: title,
     },
   };
 
@@ -76,7 +65,7 @@ function requestOnce(title) {
   });
 }
 
-function reportMetadata(title) {
+function renameTab(title) {
   const pending = requestChain.then(() => requestOnce(title));
   requestChain = pending.catch(() => false);
   return pending;
@@ -88,7 +77,7 @@ export default {
     if (
       process.env.HERDR_ENV !== "1" ||
       !process.env.HERDR_SOCKET_PATH ||
-      !process.env.HERDR_PANE_ID
+      !process.env.HERDR_TAB_ID
     ) {
       return;
     }
@@ -99,12 +88,12 @@ export default {
     const currentSelection = () => {
       const route = api.route.current;
       if (route?.name !== "session") {
-        return { key: "home", title: undefined };
+        return { key: "home", title: FALLBACK_TITLE };
       }
 
       const sessionID = route.params?.sessionID;
       if (typeof sessionID !== "string" || !sessionID) {
-        return { key: "home", title: undefined };
+        return { key: "home", title: FALLBACK_TITLE };
       }
 
       const session = api.state.session.get(sessionID);
@@ -114,8 +103,8 @@ export default {
 
       const title = displayTitle(session?.title);
       return {
-        key: `${sessionID}\u0000${title ?? ""}`,
-        title,
+        key: `${sessionID}\u0000${title ?? FALLBACK_TITLE}`,
+        title: title ?? FALLBACK_TITLE,
       };
     };
 
@@ -128,7 +117,7 @@ export default {
       const reportingKey = selection.key;
       reportPending = true;
       try {
-        const accepted = await reportMetadata(selection.title);
+        const accepted = await renameTab(selection.title);
         if (accepted && currentSelection()?.key === reportingKey) {
           lastReportedKey = reportingKey;
         }

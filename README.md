@@ -31,10 +31,10 @@ Notable fix shipped here: `groq-cleanup.sh` flattens newlines and tabs before ou
 ### opencode setup (`opencode/`)
 - MCP servers: chrome-devtools, context7, tavily, supabase
 - Notification plugin and global AGENTS.md rules
-- herdr integration that syncs session titles
+- herdr integration that renames top tabs from session titles
 
 ### Gemini CLI hooks (`agents/gemini/`)
-herdr hooks report agent state and session titles.
+herdr hooks report agent state and rename top tabs from session titles.
 
 ### Shell aliases (`shell/bashrc-aliases.snippet`)
 `settings`, `rust`, and `zed` aliases for `.bashrc`.

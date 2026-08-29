@@ -1,5 +1,5 @@
 #!/bin/sh
-# user hook: show the Antigravity conversation title in the Herdr sidebar.
+# user hook: show the Antigravity conversation title in the Herdr top tab.
 # Lives beside the herdr-managed hook and is registered under its own hooks.json
 # key, so herdr integration reinstalls and uninstalls leave it alone.
 
@@ -12,7 +12,7 @@ emit_and_exit() {
 
 [ "${HERDR_ENV:-}" = "1" ] || emit_and_exit
 [ -n "${HERDR_SOCKET_PATH:-}" ] || emit_and_exit
-[ -n "${HERDR_PANE_ID:-}" ] || emit_and_exit
+[ -n "${HERDR_TAB_ID:-}" ] || emit_and_exit
 command -v python3 >/dev/null 2>&1 || emit_and_exit
 
 python3 -c '
@@ -96,23 +96,18 @@ def title_from_history():
 title = title_from_db() or title_from_transcript() or title_from_history()
 if title:
     title = " ".join(title.split())[:80]
+else:
+    title = "Antigravity"
 
 seq = time.time_ns()
-params = {
-    "pane_id": os.environ["HERDR_PANE_ID"],
-    "source": "user:antigravity-session-title",
-    "agent": "agy",
-    "seq": seq,
-}
-if title:
-    params["display_agent"] = title
-else:
-    params["clear_display_agent"] = True
 
 request = json.dumps({
     "id": f"user:antigravity-session-title:{seq}",
-    "method": "pane.report_metadata",
-    "params": params,
+    "method": "tab.rename",
+    "params": {
+        "tab_id": os.environ["HERDR_TAB_ID"],
+        "label": title,
+    },
 })
 try:
     with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
