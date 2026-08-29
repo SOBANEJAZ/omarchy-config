@@ -52,52 +52,9 @@ def title_from_db():
         pass
     return None
 
-def title_from_transcript():
-    path = payload.get("transcriptPath")
-    if not isinstance(path, str) or not path:
-        return None
-    try:
-        with open(path, encoding="utf-8", errors="replace") as transcript:
-            for line in transcript:
-                try:
-                    entry = json.loads(line)
-                except Exception:
-                    continue
-                if entry.get("type") == "USER_INPUT":
-                    content = entry.get("content") or ""
-                    content = content.removeprefix("<USER_REQUEST>").strip()
-                    if content:
-                        return content
-    except Exception:
-        pass
-    return None
-
-def title_from_history():
-    path = os.path.expanduser("~/.gemini/antigravity-cli/history.jsonl")
-    try:
-        with open(path, encoding="utf-8", errors="replace") as history:
-            for line in history:
-                try:
-                    entry = json.loads(line)
-                except Exception:
-                    continue
-                if entry.get("conversationId") != conversation_id:
-                    continue
-                display = entry.get("display")
-                if not isinstance(display, str) or not display.strip():
-                    continue
-                if display.lstrip().startswith("/"):
-                    continue
-                return display.strip()
-    except Exception:
-        pass
-    return None
-
-title = title_from_db() or title_from_transcript() or title_from_history()
+title = title_from_db() or "Antigravity"
 if title:
     title = " ".join(title.split())[:80]
-else:
-    title = "Antigravity"
 
 seq = time.time_ns()
 

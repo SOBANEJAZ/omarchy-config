@@ -15,6 +15,13 @@
         "timeout": 10,
         "type": "command"
       }
+    ],
+    "PostInvocation": [
+      {
+        "command": "bash '/home/soban/.gemini/config/hooks/herdr-agent-session-title.sh'",
+        "timeout": 10,
+        "type": "command"
+      }
     ]
   }
 }
