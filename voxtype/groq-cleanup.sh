@@ -21,7 +21,7 @@ if [ -z "$KEY" ]; then
 fi
 
 PAYLOAD=$(jq -n --arg user "$INPUT" '{
-  model: "openai/gpt-oss-20b",
+  model: "openai/gpt-oss-120b",
   reasoning_effort: "medium",
   temperature: 0.1,
   messages: [
