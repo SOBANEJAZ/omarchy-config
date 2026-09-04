@@ -88,12 +88,9 @@ install_file "$BACKUP_DIR/opencode/opencode.json" "$HOME_DIR/.config/opencode/op
 install_file "$BACKUP_DIR/opencode/AGENTS.md" "$HOME_DIR/.config/opencode/AGENTS.md"
 [[ -f $BACKUP_DIR/opencode/tui.json ]] && install_file "$BACKUP_DIR/opencode/tui.json" "$HOME_DIR/.config/opencode/tui.json"
 [[ -f $BACKUP_DIR/opencode/tui.jsonc ]] && install_file "$BACKUP_DIR/opencode/tui.jsonc" "$HOME_DIR/.config/opencode/tui.jsonc"
-install_file "$BACKUP_DIR/opencode/herdr-opencode-session-title.js" "$HOME_DIR/.config/opencode/herdr-opencode-session-title.js"
 
 # --- Gemini hooks ----------------------------------------------------------------
 install_file "$BACKUP_DIR/agents/gemini/hooks.json" "$HOME_DIR/.gemini/config/hooks.json"
-install_file "$BACKUP_DIR/agents/gemini/hooks/herdr-agent-session-title.sh" "$HOME_DIR/.gemini/config/hooks/herdr-agent-session-title.sh"
-chmod +x "$HOME_DIR/.gemini/config/hooks/herdr-agent-session-title.sh" 2>/dev/null || true
 
 # --- Shell aliases ----------------------------------------------------------------
 if grep -q "alias settings=" "$HOME_DIR/.bashrc" 2>/dev/null; then
