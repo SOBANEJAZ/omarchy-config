@@ -92,11 +92,15 @@ install_file "$BACKUP_DIR/opencode/AGENTS.md" "$HOME_DIR/.config/opencode/AGENTS
 # --- Gemini hooks ----------------------------------------------------------------
 install_file "$BACKUP_DIR/agents/gemini/hooks.json" "$HOME_DIR/.gemini/config/hooks.json"
 
+# --- Wi-Fi Hotspot CLI -----------------------------------------------------------
+install_file "$BACKUP_DIR/bin/omarchy-hotspot" "$HOME_DIR/.local/bin/omarchy-hotspot"
+chmod +x "$HOME_DIR/.local/bin/omarchy-hotspot" 2>/dev/null || true
+
 # --- Shell aliases ----------------------------------------------------------------
-if grep -q "alias settings=" "$HOME_DIR/.bashrc" 2>/dev/null; then
+if grep -q "alias settings=" "$HOME_DIR/.bashrc" 2>/dev/null && grep -q "alias hotspot-on=" "$HOME_DIR/.bashrc" 2>/dev/null; then
   log "bashrc aliases already present"
 else
-  warn "manual step: append shell/bashrc-aliases.snippet to ~/.bashrc"
+  warn "manual step: append missing entries from shell/bashrc-aliases.snippet to ~/.bashrc"
 fi
 
 cat <<'EOF'
@@ -105,5 +109,6 @@ Manual steps not automated:
   1. opencode skills: reinstall per opencode/skills-manifest.txt
   2. Claude skill mirrors: copy shared skills into ~/.claude/skills/
   3. If secrets were missing, fill API keys into voxtype config + opencode MCP config now.
+  4. Wi-Fi hotspot (optional): run `hotspot-setup <ssid> <password>` once to install dnsmasq, add UFW rules, and create the Hotspot profile.
 EOF
 log "Restore complete. Reload Hyprland to apply monitor/input changes."

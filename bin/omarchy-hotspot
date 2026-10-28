@@ -1,0 +1,222 @@
+#!/usr/bin/env bash
+# Manage an Ethernet-backed 2.4 GHz WPA2 Wi-Fi hotspot via NetworkManager + UFW.
+set -euo pipefail
+
+WIFI_IF="${HOTSPOT_IF:-wlan0}"
+CON_NAME="${HOTSPOT_CON:-Hotspot}"
+
+log()  { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
+err()  { printf '\033[1;31merror:\033[0m %s\n' "$*" >&2; }
+
+run_root() {
+  if (( EUID == 0 )); then
+    "$@"
+  elif [[ -t 0 ]]; then
+    sudo "$@"
+  elif sudo -n true 2>/dev/null; then
+    sudo "$@"
+  else
+    pkexec "$@"
+  fi
+}
+
+hotspot_exists() {
+  LC_ALL=C nmcli -t -f NAME connection show | grep -Fxq "$CON_NAME"
+}
+
+hotspot_active() {
+  LC_ALL=C nmcli -t -f NAME connection show --active | grep -Fxq "$CON_NAME"
+}
+
+ensure_wifi_ready() {
+  rfkill unblock wifi 2>/dev/null || run_root rfkill unblock wifi
+  nmcli networking on
+  nmcli radio wifi on
+
+  # Wait for platform rfkill (e.g. dell-wifi -> phy0) and wpa_supplicant to initialize
+  local state=""
+  for _ in {1..30}; do
+    state=$(LC_ALL=C nmcli -t -f DEVICE,STATE device status | awk -F: -v dev="$WIFI_IF" '$1 == dev { print $2 }')
+    if [[ -n $state && $state != "unavailable" && $state != "unmanaged" ]]; then
+      return 0
+    fi
+    sleep 0.5
+  done
+
+  err "Wi-Fi interface '$WIFI_IF' stayed '$state' after unblocking radio."
+  exit 1
+}
+
+require_profile() {
+  if ! hotspot_exists; then
+    err "Profile '$CON_NAME' does not exist yet. Run: hotspot-setup <ssid> <password>"
+    exit 1
+  fi
+}
+
+cmd_setup() {
+  local ssid="${1:-${HOTSPOT_SSID:-desktop123}}"
+  local password="${2:-${HOTSPOT_PASSWORD:-}}"
+
+  if [[ -z $password && -t 0 ]]; then
+    read -rsp "Enter WPA2 password for '$ssid' (8-63 chars): " password
+    echo
+  fi
+
+  if (( ${#ssid} < 1 || ${#ssid} > 32 )); then
+    err "SSID must be between 1 and 32 characters."
+    exit 1
+  fi
+  if (( ${#password} < 8 || ${#password} > 63 )); then
+    err "WPA2 password must be between 8 and 63 characters."
+    exit 1
+  fi
+
+  log "Installing dnsmasq (if missing) and configuring UFW rules on $WIFI_IF..."
+  run_root bash -c '
+    set -euo pipefail
+    wifi_if=$1
+    if ! pacman -Q dnsmasq >/dev/null 2>&1; then
+      pacman -S --noconfirm --needed dnsmasq || pacman -Sy --noconfirm --needed dnsmasq
+    fi
+    ufw allow in on "$wifi_if" to any port 67 proto udp comment "Hotspot DHCP"
+    ufw allow in on "$wifi_if" to any port 53 comment "Hotspot DNS"
+    ufw route allow in on "$wifi_if" comment "Hotspot Forwarding"
+    rfkill unblock wifi
+  ' _ "$WIFI_IF"
+
+  ensure_wifi_ready
+
+  while read -r uuid; do
+    [[ -n $uuid ]] && nmcli connection delete uuid "$uuid"
+  done < <(LC_ALL=C nmcli -t -f UUID,NAME connection show | awk -F: -v name="$CON_NAME" '$2 == name { print $1 }')
+
+  # Pin 2.4 GHz (band bg) to avoid Intel iwlwifi 5 GHz LAR No-IR restrictions,
+  # enforce WPA2-CCMP, and disable WPS (wps-method 1) so Windows clients ask
+  # for the WPA2 password instead of an 8-digit router WPS PIN.
+  nmcli connection add \
+    type wifi \
+    ifname "$WIFI_IF" \
+    con-name "$CON_NAME" \
+    autoconnect no \
+    ssid "$ssid" \
+    -- \
+    802-11-wireless.mode ap \
+    802-11-wireless.band bg \
+    ipv4.method shared \
+    ipv6.method ignore \
+    802-11-wireless-security.key-mgmt wpa-psk \
+    802-11-wireless-security.psk "$password" \
+    802-11-wireless-security.proto rsn \
+    802-11-wireless-security.pairwise ccmp \
+    802-11-wireless-security.group ccmp \
+    802-11-wireless-security.pmf 1 \
+    802-11-wireless-security.wps-method 1
+
+  nmcli connection up "$CON_NAME"
+  log "Hotspot '$ssid' is live on $WIFI_IF."
+  nmcli device wifi show-password ifname "$WIFI_IF" || true
+}
+
+cmd_on() {
+  require_profile
+  ensure_wifi_ready
+  nmcli connection up "$CON_NAME"
+  log "Hotspot enabled on $WIFI_IF."
+  nmcli device wifi show-password ifname "$WIFI_IF" || true
+}
+
+cmd_off() {
+  if hotspot_active; then
+    nmcli connection down "$CON_NAME"
+    log "Hotspot disabled."
+  else
+    log "Hotspot is already off."
+  fi
+}
+
+cmd_rename() {
+  if (( $# == 0 )); then
+    err "Usage: hotspot-new-name <new-ssid>"
+    exit 1
+  fi
+  local ssid="$*"
+  if (( ${#ssid} < 1 || ${#ssid} > 32 )); then
+    err "SSID must be between 1 and 32 characters."
+    exit 1
+  fi
+  require_profile
+  nmcli connection modify "$CON_NAME" 802-11-wireless.ssid "$ssid"
+  if hotspot_active; then
+    nmcli connection up "$CON_NAME" >/dev/null
+    log "Hotspot renamed to '$ssid' and reloaded."
+  else
+    log "Hotspot SSID updated to '$ssid' (will apply on next hotspot-on)."
+  fi
+}
+
+cmd_password() {
+  if (( $# != 1 )); then
+    err "Usage: hotspot-new-pin <new-password> (8-63 characters)"
+    exit 1
+  fi
+  local password="$1"
+  if (( ${#password} < 8 || ${#password} > 63 )); then
+    err "WPA2 password must be between 8 and 63 characters."
+    exit 1
+  fi
+  require_profile
+  nmcli connection modify "$CON_NAME" \
+    802-11-wireless-security.key-mgmt wpa-psk \
+    802-11-wireless-security.psk "$password" \
+    802-11-wireless-security.wps-method 1
+  if hotspot_active; then
+    nmcli connection up "$CON_NAME" >/dev/null
+    log "Hotspot password updated and reloaded."
+  else
+    log "Hotspot password updated (will apply on next hotspot-on)."
+  fi
+}
+
+cmd_status() {
+  if hotspot_active; then
+    nmcli -f GENERAL.STATE,GENERAL.CONNECTION,IP4.ADDRESS device show "$WIFI_IF"
+    echo
+    nmcli device wifi show-password ifname "$WIFI_IF" || true
+    echo
+    log "Connected clients ($WIFI_IF):"
+    ip neigh show dev "$WIFI_IF" || true
+  else
+    log "Hotspot is currently OFF."
+    if hotspot_exists; then
+      local ssid
+      ssid=$(nmcli --get-values 802-11-wireless.ssid connection show "$CON_NAME")
+      printf 'Configured SSID: %s\n' "$ssid"
+    fi
+  fi
+}
+
+usage() {
+  cat <<'EOF'
+Usage: omarchy-hotspot <command> [args]
+
+Commands:
+  setup [ssid] [password]   Install dnsmasq, add UFW rules, create & start Hotspot
+  on                        Unblock Wi-Fi and start Hotspot
+  off                       Stop Hotspot
+  rename <new-ssid>         Change Hotspot Wi-Fi name (reloads if active)
+  password <new-password>   Change Hotspot WPA2 password (8-63 chars, reloads if active)
+  status                    Show Hotspot state, credentials/QR, and connected clients
+EOF
+}
+
+case "${1:-}" in
+  setup)    shift; cmd_setup "$@" ;;
+  on)       cmd_on ;;
+  off)      cmd_off ;;
+  rename)   shift; cmd_rename "$@" ;;
+  password) shift; cmd_password "$@" ;;
+  status)   cmd_status ;;
+  -h|--help|"") usage ;;
+  *) err "Unknown subcommand: $1"; usage >&2; exit 1 ;;
+esac

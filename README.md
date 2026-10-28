@@ -37,7 +37,22 @@ Notable fix shipped here: `groq-cleanup.sh` flattens newlines and tabs before ou
 herdr hooks report agent state.
 
 ### Shell aliases (`shell/bashrc-aliases.snippet`)
-`settings`, `rust`, and `zed` aliases for `.bashrc`.
+`settings`, `rust`, `zed`, and Wi-Fi hotspot control aliases for `.bashrc`.
+
+### Wi-Fi hotspot (`bin/omarchy-hotspot`, `shell/bashrc-aliases.snippet`)
+Shares Ethernet internet over `wlan0` through NetworkManager's `ipv4.method=shared` AP mode. `omarchy-hotspot` backs six `.bashrc` aliases:
+- `hotspot-setup <ssid> <password>` — installs `dnsmasq`, opens UFW rules on `wlan0`, and creates the `Hotspot` profile
+- `hotspot-on` / `hotspot-off` — unblocks the Wi-Fi radio and starts or stops the AP
+- `hotspot-new-name <ssid>` — renames the broadcast SSID and reloads if active
+- `hotspot-new-pin <password>` — updates the 8–63 character WPA2 passphrase and reloads if active
+- `hotspot-status` — prints active state, terminal QR code, and connected clients
+
+Hardware and firewall fixes built into `omarchy-hotspot`:
+- Installs the `dnsmasq` package without enabling `dnsmasq.service`, letting NetworkManager spawn a scoped DHCP/DNS instance on `10.42.0.1` alongside `systemd-resolved`
+- Opens UFW `67/udp` (DHCP), `53` (DNS), and `ufw route allow in on wlan0` (`FORWARD` + `DOCKER-USER`)
+- Clears Dell platform `rfkill` (`dell-wifi` → `phy0`) and polls until `wlan0` leaves `unavailable` before activating AP mode
+- Pins 2.4 GHz (`band bg`) to bypass Intel AX201 (`iwlwifi`) 5 GHz LAR `No-IR` blocks, using WPA2-CCMP (`proto rsn`, `ccmp`, `pmf 1`)
+- Disables WPS beacon advertisement (`wps-method 1` / `wps_disabled=1`) so Windows 10/11 clients ask for the Wi-Fi password instead of an 8-digit router WPS PIN
 
 ## Restore
 
