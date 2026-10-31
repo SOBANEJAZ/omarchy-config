@@ -92,6 +92,32 @@ install_file "$BACKUP_DIR/opencode/AGENTS.md" "$HOME_DIR/.config/opencode/AGENTS
 # --- Gemini hooks ----------------------------------------------------------------
 install_file "$BACKUP_DIR/agents/gemini/hooks.json" "$HOME_DIR/.gemini/config/hooks.json"
 
+# --- Antigravity CLI statusline ----------------------------------------------------
+install_file "$BACKUP_DIR/agents/antigravity/statusline.sh" "$HOME_DIR/.gemini/antigravity-cli/statusline.sh"
+chmod +x "$HOME_DIR/.gemini/antigravity-cli/statusline.sh" 2>/dev/null || true
+
+AGY_SETTINGS="$HOME_DIR/.gemini/antigravity-cli/settings.json"
+AGY_STATUSLINE='{"type":"command","command":"~/.gemini/antigravity-cli/statusline.sh","enabled":true}'
+if command -v jq >/dev/null 2>&1; then
+  mkdir -p "$(dirname "$AGY_SETTINGS")"
+  [[ -f $AGY_SETTINGS ]] || printf '{}\n' > "$AGY_SETTINGS"
+  if jq -e '.statusLine.type == "command" and .statusLine.command == "~/.gemini/antigravity-cli/statusline.sh" and .statusLine.enabled == true' "$AGY_SETTINGS" >/dev/null 2>&1; then
+    log "antigravity statusLine already configured"
+  else
+    read -rp "Set Antigravity CLI statusLine in $AGY_SETTINGS? [y/N] " a
+    if [[ $a == y ]]; then
+      cp "$AGY_SETTINGS" "$AGY_SETTINGS.pre-restore.$(date +%Y%m%d%H%M%S).bak"
+      tmp=$(mktemp)
+      jq --argjson s "$AGY_STATUSLINE" '.statusLine = $s' "$AGY_SETTINGS" > "$tmp" && mv "$tmp" "$AGY_SETTINGS"
+      log "configured: $AGY_SETTINGS statusLine"
+    else
+      warn "skipped: antigravity statusLine"
+    fi
+  fi
+else
+  warn "jq not found — set the Antigravity statusLine manually (see README)"
+fi
+
 # --- Wi-Fi Hotspot CLI -----------------------------------------------------------
 install_file "$BACKUP_DIR/bin/omarchy-hotspot" "$HOME_DIR/.local/bin/omarchy-hotspot"
 chmod +x "$HOME_DIR/.local/bin/omarchy-hotspot" 2>/dev/null || true

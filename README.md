@@ -36,6 +36,39 @@ Notable fix shipped here: `groq-cleanup.sh` flattens newlines and tabs before ou
 ### Gemini CLI hooks (`agents/gemini/`)
 herdr hooks report agent state.
 
+### Antigravity CLI statusline (`agents/antigravity/`)
+Custom two-line statusline for the Antigravity CLI (`agy`). It replaces the built-in statusline and shows mode, model, effort, conversation title, context usage, and quota per model group:
+
+```
+EDITS · Gemini 3.8 Flash · high · ai agents on elemyntz · ctx █······· 13.8% 145k/1.0M
+limits  ├ Gemini      weekly 88% ↻ 3d 22h · 5h 90% ↻ 3h 44m
+        ├ Claude/GPT  weekly 86% ↻ 5d 14h · 5h 100%
+        └ Argon       weekly 12% ↻ 3d 22h
+```
+
+Quota rows come from agy's bucket IDs (`weekly`, `5h`, `3p-weekly`, `3p-5h`, `argon-wtu-weekly`). Unknown IDs appear under `Other`. Reset times show at 120 columns or wider and hide at 100% quota. The title truncates to fit the terminal.
+
+Requires `jq`. `install.sh` copies the script and offers to set the `statusLine` block. To configure it manually:
+
+```bash
+mkdir -p ~/.gemini/antigravity-cli
+cp agents/antigravity/statusline.sh ~/.gemini/antigravity-cli/statusline.sh
+chmod +x ~/.gemini/antigravity-cli/statusline.sh
+
+jq '.statusLine = {
+  "type": "command",
+  "command": "~/.gemini/antigravity-cli/statusline.sh",
+  "enabled": true
+}' ~/.gemini/antigravity-cli/settings.json > /tmp/agy-settings.json \
+  && mv /tmp/agy-settings.json ~/.gemini/antigravity-cli/settings.json
+```
+
+Restart `agy` or run `/statusline enable` to load it. The custom command replaces the built-in line; no `stack_with_default` key is needed. Test it with:
+
+```bash
+printf '{}' | ~/.gemini/antigravity-cli/statusline.sh
+```
+
 ### Shell aliases (`shell/bashrc-aliases.snippet`)
 `settings`, `rust`, `zed`, and Wi-Fi hotspot control aliases for `.bashrc`.
 

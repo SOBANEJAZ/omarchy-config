@@ -11,6 +11,7 @@ Repo paths map to `$HOME` targets during restore:
 - `hypr/*` → `~/.config/hypr/`
 - `omarchy/*`, `voxtype/*`, `opencode/*` → `~/.config/<same dir>/`
 - `agents/gemini/*` → `~/.gemini/config/`
+- `agents/antigravity/*` → `~/.gemini/antigravity-cli/`
 - `bin/*` → `~/.local/bin/`
 - `systemd/user/*` → `~/.config/systemd/user/`
 
