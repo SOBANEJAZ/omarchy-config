@@ -5,7 +5,7 @@ Personal config for Omarchy Quattro (Arch Linux + Hyprland) on a laptop with an 
 ## Major changes
 
 ### Dual-monitor layout (`hypr/monitors.lua`)
-External 2560x1440 monitor (DP-2) sits left of the laptop screen (eDP-1). Workspaces 1–5 live on the external monitor, 6–10 on the laptop screen.
+External 2560x1440 monitor (DP-2) sits left of the laptop screen (eDP-1). Workspace placement follows Omarchy's per-monitor workspaces: each display has its own workspaces 1–10, and `Super+1`–`Super+0` switch slots on the focused monitor.
 
 ### Input tuning (`hypr/input.lua`)
 - Mouse sensitivity 1.7 with flat (no acceleration) profile

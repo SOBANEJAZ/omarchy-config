@@ -19,10 +19,5 @@ hl.monitor({ output = "eDP-1", mode = "1920x1080@60", position = "0x0", scale = 
 -- Portrait/rotated secondary monitor (transform: 1 = 90°, 3 = 270°).
 -- hl.monitor({ output = "DP-2", mode = "preferred", position = "auto", scale = 1, transform = 1 })
 
--- Pin workspaces 1-5 to the external monitor, 6-10 to the laptop.
-for i = 1, 5 do
-  hl.workspace_rule({ workspace = tostring(i), monitor = "DP-2" })
-end
-for i = 6, 10 do
-  hl.workspace_rule({ workspace = tostring(i), monitor = "eDP-1", persistent = true })
-end
+-- Workspace placement is left to Omarchy's per-monitor workspaces
+-- (default/hypr/monitor-workspaces.lua): each display has its own 1-10.
