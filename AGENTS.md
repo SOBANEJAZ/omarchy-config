@@ -26,6 +26,7 @@ Adding new config requires a matching entry in `install.sh` — nothing is disco
 
 - `opencode/AGENTS.md` is a deployed artifact, not this repo's instruction file: `install.sh` copies it to `~/.config/opencode/AGENTS.md` as global agent rules on every machine. Edit it deliberately.
 - `hypr/*.lua` use Omarchy's Lua config API (`hl.monitor()`, `hl.workspace_rule()`), not native `hyprland.conf` syntax.
+- `hypr/bindings.lua` maps workspace keys to fixed monitors: `Super+1-5` to `DP-2` (LED), `Super+6-0` to `eDP-1` (laptop) workspaces 1-5. Omarchy 4.5 manages per-monitor workspace IDs; do not re-add `workspace_rule({ monitor = ... })` pinning, which conflicts with it. See `docs/workspaces.md`.
 - `omarchy/plugins/soban.*` are omarchy-shell plugins: `manifest.json` declares the QML entry point; helper `.sh` files must stay executable.
 - `install.sh` prompts before overwriting and saves timestamped `.pre-restore.*.bak` copies. Plugin directories merge via `cp -rn`, so existing installed manifests are not overwritten.
 
