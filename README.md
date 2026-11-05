@@ -5,7 +5,22 @@ Personal config for Omarchy Quattro (Arch Linux + Hyprland) on a laptop with an 
 ## Major changes
 
 ### Dual-monitor layout (`hypr/monitors.lua`)
-External 2560x1440 monitor (DP-2) sits left of the laptop screen (eDP-1). Workspace placement follows Omarchy's per-monitor workspaces: each display has its own workspaces 1–10, and `Super+1`–`Super+0` switch slots on the focused monitor.
+External 2560x1440 monitor (DP-2) sits left of the laptop screen (eDP-1).
+
+### Workspace keys (`hypr/bindings.lua`)
+Omarchy 4.5 gives each monitor its own workspace block. The number keys use a fixed split, so they jump monitors the way the old global layout did:
+
+| Keys | Target |
+|---|---|
+| `Super+1`–`Super+5` | LED (DP-2), workspaces 1–5 |
+| `Super+6`–`Super+0` | laptop (eDP-1), workspaces 6–10 |
+
+- `Super+Shift+<n>` moves the active window to the same fixed workspace and follows it.
+- `Super+Shift+Alt+<n>` moves the window silently and leaves focus on the current workspace.
+- `Ctrl+Alt+Tab` and `Shift+Ctrl+Alt+Tab` still focus the next and previous monitor.
+- Bars keep Omarchy's per-monitor layout: LED shows 1–5; laptop shows 1–0 as workspaces 6–10 are used. Each monitor still has hidden slots outside this split.
+
+If Omarchy changes `o.workspaces.focus` or `o.workspaces.workspace_id`, adjust `hypr/bindings.lua`.
 
 ### Input tuning (`hypr/input.lua`)
 - Mouse sensitivity 1.7 with flat (no acceleration) profile

@@ -49,7 +49,7 @@ install_file() {
 }
 
 # --- Hyprland ----------------------------------------------------------------
-for f in monitors.lua input.lua looknfeel.lua; do
+for f in monitors.lua input.lua bindings.lua looknfeel.lua; do
   install_file "$BACKUP_DIR/hypr/$f" "$HOME_DIR/.config/hypr/$f"
 done
 
