@@ -13,12 +13,14 @@ Omarchy 4.5 gives each monitor its own workspace block. The number keys use a fi
 | Keys | Target |
 |---|---|
 | `Super+1`–`Super+5` | LED (DP-2), workspaces 1–5 |
-| `Super+6`–`Super+0` | laptop (eDP-1), workspaces 6–10 |
+| `Super+6`–`Super+0` | laptop (eDP-1), workspaces 1–5 |
+
+On the laptop the key numbers start at 6, but the workspace numbers start at 1: `Super+6` selects workspace 1, `Super+7` selects 2, `Super+8` selects 3, `Super+9` selects 4, and `Super+0` selects 5.
 
 - `Super+Shift+<n>` moves the active window to the same fixed workspace and follows it.
 - `Super+Shift+Alt+<n>` moves the window silently and leaves focus on the current workspace.
 - `Ctrl+Alt+Tab` and `Shift+Ctrl+Alt+Tab` still focus the next and previous monitor.
-- Bars keep Omarchy's per-monitor layout: LED shows 1–5; laptop shows 1–0 as workspaces 6–10 are used. Each monitor still has hidden slots outside this split.
+- Bars keep Omarchy's per-monitor layout: both show 1–5. Each monitor still has hidden slots outside this split.
 
 If Omarchy changes `o.workspaces.focus` or `o.workspaces.workspace_id`, adjust `hypr/bindings.lua`.
 

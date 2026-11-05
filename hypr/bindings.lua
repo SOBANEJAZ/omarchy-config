@@ -35,12 +35,14 @@ if o.dictation_installed and o.dictation_installed() then
 end
 
 -- Fixed monitor split for workspace keys:
---   SUPER + 1-5 -> LED (DP-2)
---   SUPER + 6-0 -> laptop (eDP-1)
+--   SUPER + 1-5 -> LED (DP-2) workspaces 1-5
+--   SUPER + 6-0 -> laptop (eDP-1) workspaces 1-5
+-- The laptop key numbers start at 6, but its workspace numbers start at 1:
+-- 6 -> 1, 7 -> 2, 8 -> 3, 9 -> 4, 0 -> 5.
 -- Omarchy 4.5 gives every monitor its own 1-10. These binds keep the old
 -- global-key feel while leaving the per-monitor engine in charge.
-local function workspace_key(slot)
-  return "code:" .. tostring(slot + 9)
+local function workspace_key(number)
+  return "code:" .. tostring(number + 9)
 end
 
 local function switch_to(slot, monitor_name)
@@ -86,17 +88,17 @@ local function move_window_to(slot, monitor_name, follow)
   end
 end
 
-local workspace_splits = {
-  { monitor = "DP-2", first = 1, last = 5 },
-  { monitor = "eDP-1", first = 6, last = 10 },
-}
+for slot = 1, 5 do
+  local key = workspace_key(slot)
+  o.rebind("SUPER + " .. key, "Switch to LED workspace " .. slot, switch_to(slot, "DP-2"))
+  o.rebind("SUPER + SHIFT + " .. key, "Move window to LED workspace " .. slot, move_window_to(slot, "DP-2", true))
+  o.rebind("SUPER + SHIFT + ALT + " .. key, "Move window silently to LED workspace " .. slot, move_window_to(slot, "DP-2", false))
+end
 
-for _, split in ipairs(workspace_splits) do
-  local label = split.monitor == "DP-2" and "LED" or "laptop"
-  for slot = split.first, split.last do
-    local key = workspace_key(slot)
-    o.rebind("SUPER + " .. key, "Switch to " .. label .. " workspace " .. slot, switch_to(slot, split.monitor))
-    o.rebind("SUPER + SHIFT + " .. key, "Move window to " .. label .. " workspace " .. slot, move_window_to(slot, split.monitor, true))
-    o.rebind("SUPER + SHIFT + ALT + " .. key, "Move window silently to " .. label .. " workspace " .. slot, move_window_to(slot, split.monitor, false))
-  end
+for key_number = 6, 10 do
+  local slot = key_number - 5
+  local key = workspace_key(key_number)
+  o.rebind("SUPER + " .. key, "Switch to laptop workspace " .. slot, switch_to(slot, "eDP-1"))
+  o.rebind("SUPER + SHIFT + " .. key, "Move window to laptop workspace " .. slot, move_window_to(slot, "eDP-1", true))
+  o.rebind("SUPER + SHIFT + ALT + " .. key, "Move window silently to laptop workspace " .. slot, move_window_to(slot, "eDP-1", false))
 end
