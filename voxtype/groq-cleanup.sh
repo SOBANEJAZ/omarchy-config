@@ -64,8 +64,9 @@ fi
 
 PAYLOAD=$(jq -n --arg system "$SYSTEM_PROMPT" --arg user "$INPUT" '{
   model: "qwen/qwen3.8-27b",
-  reasoning_effort: "none",
-  max_completion_tokens: 512,
+  reasoning_effort: "medium",
+  reasoning_format: "hidden",
+  max_completion_tokens: 1000,
   temperature: 0.1,
   messages: [
     {role: "system", content: $system},
