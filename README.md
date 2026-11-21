@@ -43,6 +43,11 @@ Bar height 28, base font size 16, custom clock formats.
 ### Voice dictation pipeline (`voxtype/`, `systemd/user/voxtype.service`)
 Voxtype records on a hotkey and transcribes with whisper-large-v3 through the Groq remote API. A post-processing script (`voxtype/groq-cleanup.sh`) cleans the transcript with `qwen/qwen3.8-27b` before typing it at the cursor. A systemd user service runs the daemon, and `bin/omarchy-voxtype-status` reports state in the bar.
 
+Prompt and vocabulary files merge at runtime:
+- `voxtype/prompt.txt` — base cleanup instructions (tracked publicly, no private terms)
+- `voxtype/dictionary.txt` — public tech terms and mishearing hints (one entry per line)
+- `~/.config/voxtype/dictionary.local.txt` — private terms (clients, private projects), local only and blocked by `.githooks/pre-commit`
+
 Notable fix shipped here: `groq-cleanup.sh` flattens newlines and tabs before output. Without it, whisper's segment-boundary `\n` characters reached the keyboard layer and pressed Enter mid-sentence during dictation.
 
 ### opencode setup (`opencode/`)

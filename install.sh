@@ -77,6 +77,17 @@ done
 install_file "$BACKUP_DIR/voxtype/config.toml" "$HOME_DIR/.config/voxtype/config.toml" subst
 install_file "$BACKUP_DIR/voxtype/groq-cleanup.sh" "$HOME_DIR/.config/voxtype/groq-cleanup.sh"
 chmod +x "$HOME_DIR/.config/voxtype/groq-cleanup.sh" 2>/dev/null || true
+install_file "$BACKUP_DIR/voxtype/prompt.txt" "$HOME_DIR/.config/voxtype/prompt.txt"
+install_file "$BACKUP_DIR/voxtype/dictionary.txt" "$HOME_DIR/.config/voxtype/dictionary.txt"
+if [[ -f $BACKUP_DIR/.local/voxtype-dictionary.txt ]]; then
+  install_file "$BACKUP_DIR/.local/voxtype-dictionary.txt" "$HOME_DIR/.config/voxtype/dictionary.local.txt"
+elif [[ ! -f $HOME_DIR/.config/voxtype/dictionary.local.txt ]]; then
+  cat > "$HOME_DIR/.config/voxtype/dictionary.local.txt" <<'EOF'
+# Private Voxtype dictionary (local only — never commit to git)
+# Format: one entry per line — Term, or Term — optional hint / common mishearing
+EOF
+  log "initialized: $HOME_DIR/.config/voxtype/dictionary.local.txt"
+fi
 
 install_file "$BACKUP_DIR/bin/omarchy-voxtype-status" "$HOME_DIR/.local/bin/omarchy-voxtype-status"
 chmod +x "$HOME_DIR/.local/bin/omarchy-voxtype-status" 2>/dev/null || true

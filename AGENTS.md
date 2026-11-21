@@ -22,6 +22,7 @@ Adding new config requires a matching entry in `install.sh` — nothing is disco
 - This repository is **public**. Never commit real API keys, tokens, passwords, or private network details (such as home Wi-Fi SSIDs).
 - `${GROQ_API_KEY}` and other `${VAR}` placeholders in `voxtype/config.toml` and `opencode/opencode.json` are intentional. Never replace them with real values or strip them.
 - Never copy live `~/.config/voxtype/config.toml` or `~/.config/opencode/opencode.json` directly into this repo; edit the tracked templates or keep placeholders intact.
+- Keep private Voxtype terms (clients, private projects, personal vocabulary) in `~/.config/voxtype/dictionary.local.txt` (optional gitignored backup in `.local/voxtype-dictionary.txt`). Never add private terms to `voxtype/prompt.txt` or `voxtype/dictionary.txt`.
 - Never run blind `git add -A` or `git add .`. Stage files by explicit path and review `git diff --staged` before every commit.
 - Real keys live in `.local/secrets.env` (gitignored; template: `secrets.env.example`). `install.sh` sources it and substitutes only defined variables plus `${HOME}`.
 - Keep the secret-blocking pre-commit hook active (`.githooks/pre-commit`, linked from `.git/hooks/pre-commit`).

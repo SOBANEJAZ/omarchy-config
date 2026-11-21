@@ -1,0 +1,12 @@
+# Voxtype public dictionary (tracked in omarchy-config)
+# Format: one entry per line — Term, or Term — optional hint / common mishearing
+# Blank lines and lines starting with # are ignored at runtime.
+# Put private terms (clients, private projects, personal names) in
+# ~/.config/voxtype/dictionary.local.txt instead.
+
+Supabase — backend service, not "super base"
+Voxtype — voice-to-text dictation tool, not "Vox type"
+Omarchy — Arch Linux desktop setup, not "omarchi" or "omarshi"
+Hyprland — Wayland compositor, not "Hyperland"
+Groq — AI inference provider, not "Grok"
+Qwen — Alibaba LLM family, not "Quinn" or "Quen"
