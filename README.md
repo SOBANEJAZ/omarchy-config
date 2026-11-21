@@ -41,7 +41,7 @@ Bar height 28, base font size 16, custom clock formats.
 - **soban.clipboard** — clipboard history panel, includes a migration script for older history files
 
 ### Voice dictation pipeline (`voxtype/`, `systemd/user/voxtype.service`)
-Voxtype records on a hotkey and transcribes with whisper-large-v3 through the Groq remote API. A post-processing script (`voxtype/groq-cleanup.sh`) cleans the transcript with an LLM before typing it at the cursor. A systemd user service runs the daemon, and `bin/omarchy-voxtype-status` reports state in the bar.
+Voxtype records on a hotkey and transcribes with whisper-large-v3 through the Groq remote API. A post-processing script (`voxtype/groq-cleanup.sh`) cleans the transcript with `qwen/qwen3.8-27b` before typing it at the cursor. A systemd user service runs the daemon, and `bin/omarchy-voxtype-status` reports state in the bar.
 
 Notable fix shipped here: `groq-cleanup.sh` flattens newlines and tabs before output. Without it, whisper's segment-boundary `\n` characters reached the keyboard layer and pressed Enter mid-sentence during dictation.
 

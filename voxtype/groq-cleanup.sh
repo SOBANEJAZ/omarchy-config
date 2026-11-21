@@ -21,8 +21,9 @@ if [ -z "$KEY" ]; then
 fi
 
 PAYLOAD=$(jq -n --arg user "$INPUT" '{
-  model: "openai/gpt-oss-120b",
+  model: "qwen/qwen3.8-27b",
   reasoning_effort: "medium",
+  reasoning_format: "hidden",
   temperature: 0.1,
   messages: [
     {role: "system", content: "You are a dictation post-processor. The speaker is a software developer who dictates developer content and technical terms. Receive raw speech-to-text output and return clean, polished text ready to be typed: remove filler words (um, uh, like, you know, I mean), fix spelling, grammar and punctuation, and keep technical terms intact. Output ONLY the cleaned text - no quotes, no emojis, no explanations."},
