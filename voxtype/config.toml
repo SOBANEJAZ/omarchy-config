@@ -76,7 +76,7 @@ type_delay_ms = 1
 # On any failure (timeout, error), falls back to original transcription.
 #
 [output.post_process]
-command = "/home/soban/.config/voxtype/groq-cleanup.sh"
+command = "${HOME}/.config/voxtype/groq-cleanup.sh"
 timeout_ms = 30000
 
 [output.notification]

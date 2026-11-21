@@ -24,7 +24,13 @@ else
   warn "No .local/secrets.env found — placeholders will remain unsubstituted."
 fi
 
-substitute() { envsubst < "$1"; }
+substitute() {
+  local vars='${HOME}'
+  for v in GROQ_API_KEY CONTEXT7_API_KEY TAVILY_API_KEY SUPABASE_ACCESS_TOKEN; do
+    [[ -n ${!v:-} ]] && vars+=" \${$v}"
+  done
+  envsubst "$vars" < "$1"
+}
 
 # file <src> <dest> [substitute]
 install_file() {
@@ -40,7 +46,7 @@ install_file() {
     [[ $a == y ]] || { warn "skipped: $dest"; return; }
     cp "$dest" "$dest.pre-restore.$(date +%Y%m%d%H%M%S).bak"
   fi
-  if [[ $subst == subst && -n ${GROQ_API_KEY:-}${CONTEXT7_API_KEY:-}${TAVILY_API_KEY:-}${SUPABASE_ACCESS_TOKEN:-} ]]; then
+  if [[ $subst == subst ]]; then
     substitute "$src" > "$dest"
   else
     cp "$src" "$dest"

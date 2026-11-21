@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# Block commits that stage secret files, real API keys, or hardcoded API tokens.
+set -euo pipefail
+
+fail=0
+
+staged_files=$(git diff --cached --name-only --diff-filter=ACMR)
+if [[ -z $staged_files ]]; then
+  exit 0
+fi
+
+# 1. Block forbidden secret filenames
+while IFS= read -r file; do
+  case "$file" in
+    .local/*|*.env|*.pem|*.key|*id_rsa*|*id_ed25519*)
+      if [[ $file != *.env.example ]]; then
+        echo "BLOCKED: refusing to commit secret file '$file'." >&2
+        fail=1
+      fi
+      ;;
+  esac
+done <<< "$staged_files"
+
+# 2. Scan staged added lines for real API key / token patterns (skip this hook itself)
+secret_regex='(gsk_[A-Za-z0-9]{20,}|tvly-[A-Za-z0-9_-]{16,}|sbp_[A-Za-z0-9]{20,}|ctx7sk-[A-Za-z0-9_-]{16,}|sk-(proj-|ant-)?[A-Za-z0-9_-]{20,}|(ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{20,}|AIza[0-9A-Za-z_-]{35}|xox[baprs]-[0-9A-Za-z-]{10,}|BEGIN ([A-Z]+ )?PRIVATE KEY)'
+
+matches=$(git diff --cached -U0 -- . ':!.githooks/pre-commit' \
+  | grep -E '^\+[^+]' \
+  | grep -E "$secret_regex" || true)
+
+if [[ -n $matches ]]; then
+  echo "BLOCKED: potential API key or secret detected in staged diff:" >&2
+  printf '%s\n' "$matches" >&2
+  fail=1
+fi
+
+# 3. Ensure voxtype/config.toml keeps the ${GROQ_API_KEY} placeholder
+if printf '%s\n' "$staged_files" | grep -qx 'voxtype/config.toml'; then
+  key_line=$(git show :voxtype/config.toml | grep -E '^[[:space:]]*remote_api_key[[:space:]]*=' || true)
+  if [[ -n $key_line && $key_line != *'${GROQ_API_KEY}'* ]]; then
+    echo "BLOCKED: voxtype/config.toml must use remote_api_key = \"\${GROQ_API_KEY}\"." >&2
+    fail=1
+  fi
+fi
+
+exit "$fail"

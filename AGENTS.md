@@ -19,10 +19,16 @@ Adding new config requires a matching entry in `install.sh` — nothing is disco
 
 ## Secrets
 
-- `${GROQ_API_KEY}` etc. placeholders in `voxtype/config.toml` and `opencode/opencode.json` are intentional. Never replace them with real values or strip them.
-- Real keys live in `.local/secrets.env` (gitignored; template: `secrets.env.example`). `install.sh` sources it and envsubsts those two files.
+- This repository is **public**. Never commit real API keys, tokens, passwords, or private network details (such as home Wi-Fi SSIDs).
+- `${GROQ_API_KEY}` and other `${VAR}` placeholders in `voxtype/config.toml` and `opencode/opencode.json` are intentional. Never replace them with real values or strip them.
+- Never copy live `~/.config/voxtype/config.toml` or `~/.config/opencode/opencode.json` directly into this repo; edit the tracked templates or keep placeholders intact.
+- Never run blind `git add -A` or `git add .`. Stage files by explicit path and review `git diff --staged` before every commit.
+- Real keys live in `.local/secrets.env` (gitignored; template: `secrets.env.example`). `install.sh` sources it and substitutes only defined variables plus `${HOME}`.
+- Keep the secret-blocking pre-commit hook active (`.githooks/pre-commit`, linked from `.git/hooks/pre-commit`).
 
 ## Gotchas
+
+- Avoid hardcoded `/home/<user>` paths: use `${HOME}` in files restored with `subst` (such as `voxtype/config.toml`) or `$HOME` in shell-invoked commands (such as `agents/gemini/hooks.json`).
 
 - `opencode/AGENTS.md` is a deployed artifact, not this repo's instruction file: `install.sh` copies it to `~/.config/opencode/AGENTS.md` as global agent rules on every machine. Edit it deliberately.
 - `hypr/*.lua` use Omarchy's Lua config API (`hl.monitor()`, `hl.workspace_rule()`), not native `hyprland.conf` syntax.

@@ -120,3 +120,9 @@ The script restores files, substitutes secrets from `.local/secrets.env`, instal
 ## Secrets
 
 API keys are never committed. Configs carry `${VAR}` placeholders in `voxtype/config.toml` and `opencode/opencode.json`. Real values live in `.local/secrets.env`, which `.gitignore` excludes.
+
+A pre-commit hook (`.githooks/pre-commit`) blocks secret files and API key patterns before commit. Enable it in a fresh clone with:
+
+```bash
+ln -sf ../../.githooks/pre-commit .git/hooks/pre-commit
+```
